@@ -6,6 +6,6 @@ This repository will demonstrate how to:
 - use custom font from in outside `main.cpp`
 
 # Big thanks to
-- [limine-c-template](https://github.com/Absurdponcho/PonchoOS/tree/Episode-3-Graphics-Output-Protocol)
+- [limine-c-template](https://github.com/limine-bootloader/limine-c-template)
 - [MaslOS2](https://github.com/marceldobehere/MaslOS-2)
 - [PonchoOS](https://github.com/Absurdponcho/PonchoOS/tree/Episode-3-Graphics-Output-Protocol)
