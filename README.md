@@ -8,11 +8,11 @@ This template will demonstrate how to:
 
 This template has been forked from official Limine templates. Check following table to see parent of corresponding branch.
 
-| Loading branch                       | Parent                                                                                |
-| ------------------------------------ | ------------------------------------------------------------------------------------- |
-| x86-64-cpp-v6.x (default) (outdated) | https://github.com/limine-bootloader/limine-c-template (commits prior to Limine v7.x) |
-| x86-64-c                             | https://github.com/limine-bootloader/limine-c-template-x86-64                         |
-| all-arches-c                         | https://github.com/limine-bootloader/limine-c-template                                |
+| Loading branch                                                                                     | Parent                                                                                |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [x86-64-cpp-v6.x](https://github.com/Andrej123456789/limine-loading-template) (default) (outdated) | https://github.com/limine-bootloader/limine-c-template (commits prior to Limine v7.x) |
+| [x86-64-c](https://github.com/Andrej123456789/limine-loading-template/tree/x86-64-c)               | https://github.com/limine-bootloader/limine-c-template-x86-64                         |
+| [all-arches-c](https://github.com/Andrej123456789/limine-loading-template/tree/all-arches-c)       | https://github.com/limine-bootloader/limine-c-template                                |
 
 # Big thanks to
 
