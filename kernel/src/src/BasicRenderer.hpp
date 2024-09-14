@@ -5,8 +5,8 @@
 
 struct Point
 {
-    unsigned int X;
-    unsigned int Y;
+    unsigned int x;
+    unsigned int y;
 };
 
 static struct col
@@ -37,7 +37,7 @@ static struct col
 class BasicRenderer
 {
 public:
-    Point CursorPosition;
+    Point cursor_position;
     Framebuffer *framebuffer;
     PSF1_FONT *psf1_font;
 

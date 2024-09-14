@@ -3,15 +3,15 @@
 BasicRenderer::BasicRenderer(Framebuffer *framebuffer, PSF1_FONT *psf1_font)
 {
     color = 0xffffffff;
-    CursorPosition = {0, 0};
+    cursor_position = {0, 0};
     this->framebuffer = framebuffer;
     this->psf1_font = psf1_font;
 }
 
 void BasicRenderer::PutChar(char chr, unsigned int xOff, unsigned int yOff)
 {
-    unsigned int *pixPtr = (unsigned int *)framebuffer->BaseAddress;
-    char *fontPtr = (char *)psf1_font->glyphBuffer + (chr * psf1_font->psf1_Header->charsize);
+    unsigned int *pixPtr = (unsigned int *)framebuffer->base_address;
+    char *fontPtr = (char *)psf1_font->glyph_buffer + (chr * psf1_font->psf1_header->charsize);
 
     for (unsigned long y = yOff; y < yOff + 16; y++)
     {
@@ -19,7 +19,7 @@ void BasicRenderer::PutChar(char chr, unsigned int xOff, unsigned int yOff)
         {
             if ((*fontPtr & (0b10000000 >> (x - xOff))) > 0)
             {
-                *(unsigned int *)(pixPtr + x + (y * framebuffer->PixelsPerScanLine)) = color;
+                *(unsigned int *)(pixPtr + x + (y * framebuffer->pixels_per_scan_line)) = color;
             }
         }
         fontPtr++;
@@ -34,24 +34,24 @@ void BasicRenderer::Print(const char *str)
         switch (*chr)
         {
             case '\n':
-                CursorPosition.X = 0;
-                CursorPosition.Y += 16;
+                cursor_position.x = 0;
+                cursor_position.y += 16;
                 break;
 
             case '\t':
-                CursorPosition.X += 8;
+                cursor_position.x += 8;
                 break;
             
             default:
-                PutChar(*chr, CursorPosition.X, CursorPosition.Y);
-                CursorPosition.X += 8;
+                PutChar(*chr, cursor_position.x, cursor_position.y);
+                cursor_position.x += 8;
                 break;
         }
 
-        if (CursorPosition.X + 8 > framebuffer->Width)
+        if (cursor_position.x + 8 > framebuffer->width)
         {
-            CursorPosition.X = 0;
-            CursorPosition.Y += 16;
+            cursor_position.x = 0;
+            cursor_position.y += 16;
         }
 
         chr++;
@@ -60,13 +60,13 @@ void BasicRenderer::Print(const char *str)
 
 void BasicRenderer::Clear(uint32_t color, bool resetCursor)
 {
-    uint64_t fbBase = (uint64_t)framebuffer->BaseAddress;
-    uint64_t pxlsPerScanline = framebuffer->PixelsPerScanLine;
-    uint64_t fbHeight = framebuffer->Height;
+    uint64_t fbBase = (uint64_t)framebuffer->base_address;
+    uint64_t pxlsPerScanline = framebuffer->pixels_per_scan_line;
+    uint64_t fbHeight = framebuffer->height;
 
-    for (int64_t y = 0; y < framebuffer->Height; y++)
+    for (int64_t y = 0; y < framebuffer->height; y++)
     {
-        for (int64_t x = 0; x < framebuffer->Width; x++)
+        for (int64_t x = 0; x < framebuffer->width; x++)
         {
             *((uint32_t *)(fbBase + 4 * (x + pxlsPerScanline * y))) = color;
         }
@@ -74,6 +74,6 @@ void BasicRenderer::Clear(uint32_t color, bool resetCursor)
 
     if (resetCursor)
     {
-        CursorPosition = {0, 0};
+        cursor_position = {0, 0};
     }
 }
