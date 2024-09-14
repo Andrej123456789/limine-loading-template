@@ -1,5 +1,5 @@
-/* Tell the linker that we want an x86_64 ELF64 output file */
-OUTPUT_FORMAT(elf64-x86-64)
+/* Tell the linker that we want an aarch64 ELF64 output file */
+OUTPUT_FORMAT(elf64-littleaarch64)
 
 /* We want the symbol kmain to be our entry point */
 ENTRY(kmain)
@@ -31,14 +31,6 @@ SECTIONS
 
     .rodata : {
         *(.rodata .rodata.*)
-    } :rodata
-
-    /* C++ is a language that allows for global constructors. In order to obtain the */
-    /* address of the ".init_array" section we need to define a symbol for it. */
-    .init_array : {
-        __init_array = .;
-        *(.init_array .init_array.*)
-        __init_array_end = .;
     } :rodata
 
     /* Move to the next memory page for .data */
