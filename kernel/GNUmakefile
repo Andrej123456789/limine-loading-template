@@ -18,19 +18,13 @@ $(call USER_VARIABLE,PREFIX,/usr/local)
 # User controllable C compiler command.
 $(call USER_VARIABLE,KCC,cc)
 
-# User controllable C++ compiler command.
-$(call USER_VARIABLE,KCXX,c++)
-
 # User controllable linker command.
 $(call USER_VARIABLE,KLD,ld)
 
 # User controllable C flags.
 $(call USER_VARIABLE,KCFLAGS,-g -O2 -pipe)
 
-# User controllable C++ flags. We default to same as C flags.
-$(call USER_VARIABLE,KCXXFLAGS,$(KCFLAGS))
-
-# User controllable C/C++ preprocessor flags. We set none by default.
+# User controllable C preprocessor flags. We set none by default.
 $(call USER_VARIABLE,KCPPFLAGS,)
 
 # User controllable nasm flags.
@@ -41,15 +35,16 @@ $(call USER_VARIABLE,KLDFLAGS,)
 
 # Ensure the dependencies have been obtained.
 ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = distclean ) && echo 1),1)
-    ifeq ($(shell ( ! test -d freestnd-c-hdrs || ! test -d freestnd-cxx-hdrs || ! test -f src/cc-runtime.c || ! test -f src/limine.h ) && echo 1),1)
+    ifeq ($(shell ( ! test -d freestnd-c-hdrs-0bsd || ! test -f src/cc-runtime.c || ! test -f src/limine.h ) && echo 1),1)
         $(error Please run the ./get-deps script first)
     endif
 endif
 
-# Internal flags shared by both C and C++ compilers.
-override SHARED_FLAGS := \
+# Internal C flags that should not be changed by the user.
+override KCFLAGS += \
     -Wall \
     -Wextra \
+    -std=gnu11 \
     -nostdinc \
     -ffreestanding \
     -fno-stack-protector \
@@ -67,34 +62,13 @@ override SHARED_FLAGS := \
     -mno-red-zone \
     -mcmodel=kernel
 
-# Internal C/C++ preprocessor flags that should not be changed by the user.
-override KCPPFLAGS_C := \
+# Internal C preprocessor flags that should not be changed by the user.
+override KCPPFLAGS := \
     -I src \
-    -isystem freestnd-c-hdrs/x86_64/include \
     $(KCPPFLAGS) \
+    -isystem freestnd-c-hdrs-0bsd \
     -MMD \
     -MP
-
-# Internal C++ only preprocessor flags.
-override KCPPFLAGS_CXX := \
-    -I src \
-    -isystem freestnd-c-hdrs/x86_64/include \
-    -isystem freestnd-cxx-hdrs/x86_64/include \
-    $(KCPPFLAGS) \
-    -MMD \
-    -MP
-
-# Internal C flags that should not be changed by the user.
-override KCFLAGS += \
-    -std=gnu11 \
-    $(SHARED_FLAGS)
-
-# Internal C++ flags that should not be changed by the user.
-override KCXXFLAGS += \
-    -std=gnu++20 \
-    -fno-rtti \
-    -fno-exceptions \
-    $(SHARED_FLAGS)
 
 # Internal nasm flags that should not be changed by the user.
 override KNASMFLAGS += \
@@ -110,14 +84,13 @@ override KLDFLAGS += \
     -gc-sections \
     -T linker.ld
 
-# Use "find" to glob all *.c, *.cpp, *.S, and *.asm files in the tree and obtain the
+# Use "find" to glob all *.c, *.S, and *.asm files in the tree and obtain the
 # object and header dependency file names.
 override CFILES := $(shell cd src && find -L * -type f -name '*.c' | LC_ALL=C sort)
-override CXXFILES := $(shell cd src && find -L * -type f -name '*.cpp' | LC_ALL=C sort)
 override ASFILES := $(shell cd src && find -L * -type f -name '*.S' | LC_ALL=C sort)
 override NASMFILES := $(shell cd src && find -L * -type f -name '*.asm' | LC_ALL=C sort)
-override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(CXXFILES:.cpp=.cpp.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o))
-override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(CXXFILES:.cpp=.cpp.d) $(ASFILES:.S=.S.d))
+override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o))
+override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
 
 # Default target.
 .PHONY: all
@@ -134,17 +107,12 @@ bin/$(OUTPUT): GNUmakefile linker.ld $(OBJ)
 # Compilation rules for *.c files.
 obj/%.c.o: src/%.c GNUmakefile
 	mkdir -p "$$(dirname $@)"
-	$(KCC) $(KCFLAGS) $(KCPPFLAGS_C) -c $< -o $@
-
-# Compilation rules for *.cpp files.
-obj/%.cpp.o: src/%.cpp GNUmakefile
-	mkdir -p "$$(dirname $@)"
-	$(KCXX) $(KCXXFLAGS) $(KCPPFLAGS_CXX) -c $< -o $@
+	$(KCC) $(KCFLAGS) $(KCPPFLAGS) -c $< -o $@
 
 # Compilation rules for *.S files.
 obj/%.S.o: src/%.S GNUmakefile
 	mkdir -p "$$(dirname $@)"
-	$(KCC) $(KCFLAGS) $(KCPPFLAGS_C) -c $< -o $@
+	$(KCC) $(KCFLAGS) $(KCPPFLAGS) -c $< -o $@
 
 # Compilation rules for *.asm (nasm) files.
 obj/%.asm.o: src/%.asm GNUmakefile
@@ -159,7 +127,7 @@ clean:
 # Remove everything built and generated including downloaded dependencies.
 .PHONY: distclean
 distclean: clean
-	rm -rf freestnd-c-hdrs freestnd-cxx-hdrs src/cc-runtime.c src/limine.h
+	rm -rf freestnd-c-hdrs-0bsd src/cc-runtime.c src/limine.h
 
 # Install the final built executable to its final on-root location.
 .PHONY: install
